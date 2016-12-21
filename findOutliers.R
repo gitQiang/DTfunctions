@@ -35,7 +35,7 @@ findOutliers <- function(tablename, desname, cols, pcut=0.05, pnor=0.05, pqua=0.
                 
                 if(n > 1){
                         scM <- sapply(1:n, function(ii) outn1(as.numeric(data0[,cols[ii]]), pcut)$sc )
-                        if(mod==1) sc <- rowSums(scM)
+                        if(mod==1) sc <- rowSums(scM)/ncol(scM)
                         if(mod==2) sc <- apply(scM, 1, min)       
                         if(mod==3) sc <- apply(scM, 1, weighted.mean, ws, na.rm=TRUE)
                         
