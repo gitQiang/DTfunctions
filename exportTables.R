@@ -1,18 +1,8 @@
-exportTables <- function(tablename, desname, td=NULL, colt, ids, total){
-        ## tablename: table name; ex: 调研数据-PTA.csv
-        ## desname: described file; ex: 调研数据-PTA.csvmeta
+exportTables <- function(data0, td=NULL, colt, ids, total){
         ## td: time dimension, that is, day, week, month, season and year
         ## colt: colnames of time or date column
         ## ids: conserved ids
         ## total: orders of sumup in different ways, ex: list(ins=c("数量"), ons=c("numS"), fs="sum")
-        
- 
-        ## input data from table or database ======= need to normalize
-        data0 <- read.delim(tablename)
-        data0 <- data0[!is.na(data0[,1]), ]
-        des <- read.table(desname,skip=4,header=FALSE,sep=":")
-        data0[,"日期"] <- gsub("\\.","-",data0[,"日期"])
-        
         
         useDates <- data0[ ,colt]
         useg <- dateGroup(useDates, di=td)

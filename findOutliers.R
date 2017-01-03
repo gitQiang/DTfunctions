@@ -1,21 +1,12 @@
-findOutliers <- function(tablename, desname, cols, pcut=0.05, pnor=0.05, pqua=0.05, mod=1, ws){
-        ## tablename: table name; ex: 调研数据-PTA.csv
-        ## desname: described file; ex: 调研数据-PTA.csvmeta
+findOutliers <- function(data0, cols=NULL, pcut=0.05, pnor=0.05, pqua=0.05, mod=1, ws){
         ## cols: colnames for outlier analysis
         ## pcut: p-value cutoff to decide whether it is normal distribution or not
         ## pnor: outlier cutofff from normal distribution
         ## pqua: outlier cutoff from quantile function
         ## mod1: 1 sum; 2 max; 3; weighted; modes of outlier analysis based on multiple columns
         ## ws: weights of multiple columns
-        
-        
-        ## input data from table or database ======= need to normalize
-        data0 <- read.delim(tablename)
-        data0 <- data0[!is.na(data0[,cols[1]]), ]
-        
-        
-        
-        
+
+        if(is.null(cols)) cols <- colnames(data0)
         library(nortest)
         ind <- c()
         if(nrow(data0) > 10){ ## if data point is smaller than 10, we don't do outlier analysis.
