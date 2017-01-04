@@ -1,13 +1,38 @@
 configF <- function(protype1, data0, attr){
        
-        proConf1 <- proConfig(protype1)
-        para <- getModel_Para(proConf1, protype1)
-        input <- getInput(para, data0, attr, protype1)
-        
-        ## running
         protype <- c("Classification","Clustering","findOutliers","priorRules","rating2","tsAnalysis1","Regression", "exportTables") 
-        if(protype1=="Classification") res <- Classification(xtrain,ytrain,kcv=1,xpred=NULL,plot=FALSE, med="RF")
+        if(is.numeric(protype1)) protype1 <- protype[protype1]
         
+        if(protype1 %in% protype){
+                proConf1 <- proConfig(protype1) 
+                para <- getModel_Para(proConf1, protype1)
+                input <- getInput(para, data0, attr, protype1)
+                
+                ## source functions
+                source("Classification.R")
+                source("Clustering.R")
+                source("findOutliers.R")
+                source("priorRules.R")
+                source("rating2.R")
+                source("tsAnalysis1.R")
+                source("Regression.R")
+                source("exportTables.R")
+                
+                ## running
+                #if(protype1=="Classification") res <- Classification(input$xtrain,input$ytrain,input$kcv,input$xpred,input$plot, input$med)
+                if(protype1=="Clustering") res <- Clustering(input$x, input$med, input$k, input$dis, input$plot)
+                if(protype1=="findOutliers") res <- findOutliers(input$data0, input$cols, input$pcut, input$pnor, input$pqua, input$mod, input$ws)
+                if(protype1=="priorRules") res <- priorRules(input$data0, input$med, input$min_sup, input$min_conf, input$maxlen, input$plot)
+                if(protype1=="rating2") res <- rating2(input$dt, input$wfile, input$NAnum, input$rate_range)
+                if(protype1=="tsAnalysis1") res <- tsAnalysis1(input$data0, input$cols, input$ic, input$plot)
+                # if(protype1=="Regression") res <- Regression(data0,ylab,med, plot=FALSE)
+                if(protype1=="exportTables") res <- exportTables(input$data0, input$td, input$colt, input$ids, input$total)
+        }else{
+                print("model type error!")
+                res <- c()
+        }
+        
+        res
 }
 
 
@@ -59,6 +84,78 @@ getInput <- function(para, data0, attr, protype1){
                 input$med <- ifelse(para[[6]]=="", "RF", para[[6]])
         }
         
+        if(protype1=="Clustering"){
+                input$x <- data0[, para[[1]]]
+                input$med <- ifelse(para[[2]]=="", "hclust", para[[2]])
+                input$k <- ifelse(para[[3]]=="", 3, as.numeric(para[[3]]))
+                input$dis <- ifelse(para[[4]]=="", "euclidean", para[[4]])
+                if(is.na(as.numeric(para[[5]]))){ input$plot <- FALSE
+                }else{ input$plot <- ifelse(as.numeric(para[[5]]) > 0, TRUE, FALSE)}
+        }
+        
+        if(protype1=="findOutliers"){
+                if( para[[1]] %in% c("","all") ){ input$data0 <- data0
+                }else{ input$data0 <- data0[, unlist(strsplit(para[[1]], " "))] }
+                
+                if(para[[2]]==""){input$cols <- NULL
+                }else{ input$cols <- unlist(strsplit(para[[2]], " ")) }
+                
+                input$pcut <- ifelse(para[[3]]=="", 0.05, as.numeric(para[[3]]))
+                input$pnor <- ifelse(para[[4]]=="", 0.05, as.numeric(para[[4]]))
+                input$pqua <- ifelse(para[[5]]=="", 0.05, as.numeric(para[[5]]))
+                input$mod <- ifelse(para[[6]]=="", 1, as.numeric(para[[6]]))
+                
+                if(para[[6]]==""){ input$ws <- ""
+                }else{ input$ws  <- as.numeric(unlist(strsplit(para[[7]]," ")))}
+        }
+        
+        if(protype1=="exportTables"){
+                if( para[[1]] %in% c("","all") ){ input$data0 <- data0
+                }else{ input$data0 <- data0[, unlist(strsplit(para[[1]], " "))] }
+                
+                input$td <- ifelse(para[[2]]=="", NULL, para[[2]])
+                input$colt <- ifelse(para[[3]]=="", "", para[[3]])
+                
+                if(para[[4]]==""){input$ids <- ""
+                }else{input$ids <- unlist(strsplit(para[[4]], "  *"))}
+                
+                if(para[[5]]==""){ input$total <- ""
+                }else{ 
+                        tmp <- unlist(strsplit(para[[5]], "  *"))
+                        input$total <- list(list(tmp[1], tmp[2], tmp[3]))
+                }
+        }
+        
+        if(protype1=="priorRules"){
+                if( para[[1]] %in% c("","all") ){ input$data0 <- data0
+                }else{ input$data0 <- data0[, unlist(strsplit(para[[1]], "  *"))] }
+                input$med <- ifelse(para[[2]]=="", "apriori", para[[2]])
+                input$min_sup <- ifelse(para[[3]]=="", 0.05, as.numeric(para[[3]]))
+                input$min_conf <- ifelse(para[[4]]=="", 0.05, as.numeric(para[[4]]))
+                input$maxlen <- ifelse(para[[5]]=="", 3, as.numeric(para[[5]]))
+                if(is.na(as.numeric(para[[6]]))){ input$plot <- FALSE
+                }else{ input$plot <- ifelse(as.numeric(para[[6]]) > 0, TRUE, FALSE)}
+        }
+        
+        if(protype1=="rating2"){
+                if( para[[1]] %in% c("","all") ){ input$dt <- data0
+                }else{ input$dt <- data0[, unlist(strsplit(para[[1]], "  *"))] }
+                input$wfile <- ifelse(para[[2]]=="", "warning", para[[2]])
+                input$NAnum <- ifelse(para[[3]]=="", 1, as.numeric(para[[3]]))
+                input$rate_range <- ifelse(para[[4]]=="", "overall", para[[4]] )
+        }
+        
+        if(protype1=="tsAnalysis1"){
+                if( para[[1]] %in% c("","all") ){ input$data0 <- data0
+                }else{ input$data0 <- data0[, unlist(strsplit(para[[1]], "  *"))] }
+                input$cols <- ifelse(para[[2]]=="", "warning", para[[2]])
+                input$ic <- ifelse(para[[3]]=="", "aic", para[[3]])
+                if(is.na(as.numeric(para[[4]]))){ input$plot <- FALSE
+                }else{ input$plot <- ifelse(as.numeric(para[[4]]) > 0, TRUE, FALSE)}
+        }
+        
+        
         input
 }
+
 

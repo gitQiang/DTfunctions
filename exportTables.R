@@ -4,9 +4,13 @@ exportTables <- function(data0, td=NULL, colt, ids, total){
         ## ids: conserved ids
         ## total: orders of sumup in different ways, ex: list(ins=c("ÊýÁ¿"), ons=c("numS"), fs="sum")
         
-        useDates <- data0[ ,colt]
-        useg <- dateGroup(useDates, di=td)
-        uniDate <- unique(useg)
+        if(is.null(td)){
+                uniDate <- NULL        
+        }else{
+                useDates <- data0[ ,colt]
+                useg <- dateGroup(useDates, di=td)
+                uniDate <- unique(useg)
+        }
         
         if(length(ids)==1){
                 cLabs <- data0[ ,ids]
@@ -15,16 +19,15 @@ exportTables <- function(data0, td=NULL, colt, ids, total){
         }
         #uniLab <- unique(cLabs)
         
-        
         res <- list()
         for(i in 1:length(total)){
                 
                 oneOrder <- total[[i]]
                 subExport <- c()
                 
-                for(j in 1:length(uniDate)){
-                        subTable <- data0[(useg %in% uniDate[j]),  ]
-                        oneLab <- cLabs[useg %in% uniDate[j]]
+                if(is.null(uniDate)){
+                        subTable <- data0
+                        oneLab <- cLabs
                         
                         tmp <- c()
                         for(k in 1:length(oneOrder[[3]])){
@@ -34,7 +37,22 @@ exportTables <- function(data0, td=NULL, colt, ids, total){
                         oneR <- aggregate(subTable[ ,oneOrder[[1]]], by=list(oneLab), oneOrder[[3]][1])[ ,1]
                         tmp <- cbind(subTable[match(oneR, oneLab), ids], tmp)
                         rownames(tmp) <- paste(uniDate[j], 1:length(oneR), sep=":")
-                        subExport <- rbind(subExport,tmp)
+                        subExport <- tmp
+                }else{
+                        for(j in 1:length(uniDate)){
+                                subTable <- data0[(useg %in% uniDate[j]),  ]
+                                oneLab <- cLabs[useg %in% uniDate[j]]
+                                
+                                tmp <- c()
+                                for(k in 1:length(oneOrder[[3]])){
+                                        oneR <- aggregate(subTable[ ,oneOrder[[1]]], by=list(oneLab), oneOrder[[3]][k])[ ,-1]
+                                        tmp <- cbind(tmp,as.matrix(oneR))
+                                }
+                                oneR <- aggregate(subTable[ ,oneOrder[[1]]], by=list(oneLab), oneOrder[[3]][1])[ ,1]
+                                tmp <- cbind(subTable[match(oneR, oneLab), ids], tmp)
+                                rownames(tmp) <- paste(uniDate[j], 1:length(oneR), sep=":")
+                                subExport <- rbind(subExport,tmp)
+                        }
                 }
                 
                 colnames(subExport) <- c(ids, oneOrder[[2]])

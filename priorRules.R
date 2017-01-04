@@ -9,7 +9,8 @@ priorRules <- function(data0, med="apriori", min_sup=0.1, min_conf=0.5, maxlen=3
         
         ## 加载需要的程序包
         library(arules)
-
+        if(typeof(data0)!="S4") data0 <- as(as.matrix(data0), "transactions")
+        
         if(med=="apriori") rulesR <- apriori(data0,parameter=list(support=min_sup,confidence=min_conf,minlen=2,maxlen=maxlen))
        
         if(med=="eclat") rulesR <- eclat(data0,parameter=list(support=min_sup,minlen=2,maxlen=maxlen))  
