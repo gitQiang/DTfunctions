@@ -1,4 +1,4 @@
-Clustering <- function(x, med="hclust", k=3, dis="euclidean", plot=FALSE){
+Clustering <- function(x, di="row", med="hclust", k=3, dis="euclidean", plot=FALSE){
         ## Inputs:
         ## x: A numeric matrix of data
         ## med: "hclust", "kmeans", "knn"
@@ -8,7 +8,11 @@ Clustering <- function(x, med="hclust", k=3, dis="euclidean", plot=FALSE){
         
         ## Outputs:
         ## fit: fitted model
-       
+        
+        x <- as.matrix(x)
+        mode(x) <- "numeric"
+        if(di=="col") x <- t(x)
+        
         if(med=="hclust"){
                 d <- dist(x, method = dis)
                 fit <- hclust(d, method = "complete", members = NULL)

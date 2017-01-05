@@ -132,17 +132,22 @@ Classification <- function(xtrain,ytrain,kcv=1,xpred=NULL,plot=FALSE, med="RF"){
 }
 
 
-sample.cross <- function(nsample, K){
+sample.cross <- function(nsample, K=3){
         
         train_sample <- list()
         pred_sample <- list()
         
-        nk <- floor(nsample/K)
-        sam <- sample(nsample)
-        
-        for(i in 1:K){
-                pred_sample[[i]] <- sam[((i-1)*nk+1): min(i*nk, nsample)]
-                train_sample[[i]] <- setdiff(sam,pred_sample[[i]])
+        if(K>1){
+                nk <- floor(nsample/K)
+                sam <- sample(nsample)
+                
+                for(i in 1:K){
+                        pred_sample[[i]] <- sam[((i-1)*nk+1): min(i*nk, nsample)]
+                        train_sample[[i]] <- setdiff(sam,pred_sample[[i]])
+                }
+        }else{
+                train_sample[[1]] <- 1:nsample
+                pred_sample[[1]] <- 1:nsample
         }
         
         list(train=train_sample,pred=pred_sample)

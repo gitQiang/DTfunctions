@@ -3,6 +3,7 @@ exportTables <- function(data0, td=NULL, colt, ids, total){
         ## colt: colnames of time or date column
         ## ids: conserved ids
         ## total: orders of sumup in different ways, ex: list(ins=c("ÊýÁ¿"), ons=c("numS"), fs="sum")
+        library(lubridate)
         
         if(is.null(td)){
                 uniDate <- NULL        
